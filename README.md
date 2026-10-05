@@ -2,6 +2,7 @@
 
 给 **Hyper-V 虚拟机共享宿主机显卡** 的图形化一键部署工具：自动完成 GPU 分区（GPU-PV）配置、显卡驱动同步、内存映射（MMIO）设置，任一步骤失败自动回滚，让虚拟机获得接近原生的显卡性能（游戏 / 图形应用 / 渲染）。
 
+[![Build](https://github.com/itxw168/HyperV-GPU-PV/actions/workflows/build.yml/badge.svg)](https://github.com/itxw168/HyperV-GPU-PV/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-blue)]()
 [![.NET](https://img.shields.io/badge/.NET-8.0-purple)]()
@@ -18,6 +19,16 @@
 - 🎯 **一键部署 GPU 分区**：按比例（5% ~ 100%）分配显存 / 算力 / 解码 / 编码，自动设置 MMIO，自动把宿主显卡驱动同步进虚拟机，**任一步骤失败自动回滚**
 - ♻️ **一键卸载还原**：移除分区、复位 MMIO、按原状态恢复虚拟机
 - 📜 **全程实时日志**：每一步执行过程可视化，出错原因直接可读
+
+## 📸 界面预览
+
+![主界面](docs/screenshots/main-window.png)
+
+<sub>主界面：自动检测虚拟机与可分区显卡 → 拖滑块设置分配比例 → 一键部署 / 卸载，全过程实时日志</sub>
+
+![新建虚拟机](docs/screenshots/new-vm-dialog.png)
+
+<sub>新建虚拟机：第 2 代 + 静态内存 + 增强会话，统一存储于 D:\Hyper-v，可挂载 ISO 直接装机</sub>
 
 ## 🚀 快速开始
 
@@ -56,16 +67,23 @@
 # 需要 .NET 8 SDK：https://dotnet.microsoft.com/download/dotnet/8.0
 powershell -ExecutionPolicy Bypass -File build.ps1
 
-# 产物：publish\GpuPartitionTool.exe（单文件；目标机器需安装 .NET 8 Desktop Runtime）
+# 产物：
+#   publish\GpuPartitionTool.exe            单文件主程序
+#   publish\HyperV-GPU-PV_v<版本>.zip       发行压缩包（exe + 启动器 + 使用说明）
 ```
+
+> 仓库已配置 GitHub Actions（`.github/workflows/build.yml`）：推送 `v*` 标签会自动构建并创建 Release；普通推送 / PR 会上传构建产物供下载。
 
 ## 📁 目录结构
 
 ```
-├── build.ps1                     # 一键构建脚本
+├── .github\workflows\build.yml   # GitHub Actions：自动构建 + 打 tag 自动发 Release
+├── build.ps1                     # 一键构建脚本（生成 exe + 发行 zip）
+├── release-assets\               # 发行包附加文件（启动程序.bat / 使用说明.txt）
 ├── GpuPartitionTool.sln          # Visual Studio 解决方案
 ├── docs\
-│   └── 设计文档.md               # 实现设计与部署状态机说明
+│   ├── 设计文档.md               # 实现设计与部署状态机说明
+│   └── screenshots\              # README 界面截图
 ├── src\GpuPartitionTool\
 │   ├── App.xaml / MainWindow.xaml（主界面） / CreateVmWindow.xaml（新建虚拟机）
 │   ├── Services\                 # PowerShellRunner / HyperVService / DeployService
@@ -114,6 +132,6 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 
 **Requirements**: Windows 10 / 11, administrator rights, .NET 8 Desktop Runtime (the launcher checks it for you), a GPU-PV capable GPU (Intel iGPU / AMD best supported).
 
-**Build**: `powershell -ExecutionPolicy Bypass -File build.ps1` (requires .NET 8 SDK) → `publish\GpuPartitionTool.exe`.
+**Build**: `powershell -ExecutionPolicy Bypass -File build.ps1` (requires .NET 8 SDK) → `publish\GpuPartitionTool.exe`. Pushing a `v*` tag triggers GitHub Actions to build and publish a Release automatically.
 
 **Credits**: inspired by the community guide at rainng.com and the Easy-GPU-PV project. **License**: MIT © 2026 小魏技术服务 (Xiao Wei Technical Services).
