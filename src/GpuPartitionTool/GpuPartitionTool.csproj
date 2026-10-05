@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <AssemblyName>GpuPartitionTool</AssemblyName>
+    <RootNamespace>GpuPartitionTool</RootNamespace>
+    <PublishSingleFile>false</PublishSingleFile>
+    <AssemblyTitle>Hyper-V 显卡虚拟化部署工具</AssemblyTitle>
+    <Product>Hyper-V 显卡虚拟化部署工具</Product>
+    <Company>小魏技术服务</Company>
+    <Copyright>Copyright © 2026 小魏技术服务</Copyright>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Description>自动为 Hyper-V 虚拟机配置 GPU 分区（GPU-PV），让虚拟机使用宿主机显卡</Description>
+    <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- PowerShell 脚本内嵌进程序集，运行时自动释放，保证单文件拷贝即用 -->
+    <EmbeddedResource Include="Scripts\*.ps1" />
+  </ItemGroup>
+
+</Project>

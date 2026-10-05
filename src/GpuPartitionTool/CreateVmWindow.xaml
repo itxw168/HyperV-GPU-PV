@@ -1,0 +1,54 @@
+<Window x:Class="GpuPartitionTool.CreateVmWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="新建虚拟机"
+        Width="420" Height="Auto" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        FontFamily="Microsoft YaHei UI"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        Background="#F0F2F5">
+
+    <Border Background="White" BorderBrush="#D8DEE8" BorderThickness="1" CornerRadius="8" Margin="12" Padding="18">
+        <StackPanel>
+            <TextBlock Text="新建虚拟机" FontSize="16" FontWeight="Bold" Foreground="#0F172A"/>
+            <TextBlock Text="将存储于 D:\Hyper-v，默认开启增强会话（第2代）" FontSize="11.5" Foreground="#94A3B8" Margin="0,3,0,14"/>
+
+            <TextBlock Text="虚拟机名称" FontSize="12.5" Foreground="#334155"/>
+            <TextBox x:Name="NameBox" Height="30" Margin="0,4,0,0" VerticalContentAlignment="Center"
+                     FontSize="13" Padding="6,0" Text="Win01"/>
+
+            <TextBlock Text="内存 (GB)" FontSize="12.5" Foreground="#334155" Margin="0,10,0,0"/>
+            <TextBox x:Name="MemBox" Height="30" Margin="0,4,0,0" VerticalContentAlignment="Center"
+                     FontSize="13" Padding="6,0" Text="8"/>
+
+            <TextBlock Text="CPU 核数" FontSize="12.5" Foreground="#334155" Margin="0,10,0,0"/>
+            <TextBox x:Name="CpuBox" Height="30" Margin="0,4,0,0" VerticalContentAlignment="Center"
+                     FontSize="13" Padding="6,0" Text="4"/>
+
+            <TextBlock Text="磁盘大小 (GB)" FontSize="12.5" Foreground="#334155" Margin="0,10,0,0"/>
+            <TextBox x:Name="DiskBox" Height="30" Margin="0,4,0,0" VerticalContentAlignment="Center"
+                     FontSize="13" Padding="6,0" Text="80"/>
+
+            <TextBlock Text="系统安装镜像 ISO（可选，选择后开机即进入系统安装）" FontSize="12.5" Foreground="#334155" Margin="0,10,0,0"/>
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="IsoBox" Height="30" VerticalContentAlignment="Center"
+                         FontSize="12" Padding="6,0" IsReadOnly="True"
+                         ToolTip="可稍后在 Hyper-V 设置中挂载"/>
+                <Button Grid.Column="2" Content="浏览..." Height="30" Padding="12,0" Click="BrowseButton_Click"/>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                <Button Content="创建" Width="100" Height="34" Background="#2563EB" Foreground="White"
+                        FontWeight="SemiBold" BorderThickness="0" Cursor="Hand" Margin="0,0,10,0" Click="CreateButton_Click"/>
+                <Button Content="取消" Width="80" Height="34" Background="White" Foreground="#475569"
+                        BorderBrush="#CBD5E1" BorderThickness="1" Cursor="Hand" Click="CancelButton_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

@@ -1,0 +1,14 @@
+# ===== 构建产物（不入库）=====
+[Bb]in/
+[Oo]bj/
+publish/
+.vs/
+*.user
+*.suo
+*.pdb
+
+# ===== 本地 / 私有文件 =====
+_backup_oss_*/
+Hyper-V_GPU-PV/
+.trae/
+.tmp*

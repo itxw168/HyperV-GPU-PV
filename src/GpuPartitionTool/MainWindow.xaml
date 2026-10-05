@@ -1,0 +1,379 @@
+<Window x:Class="GpuPartitionTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Hyper-V 显卡虚拟化部署工具（管理员）"
+        Width="1200" Height="820" MinWidth="1040" MinHeight="700"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Microsoft YaHei UI"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        Background="#EEF1F6">
+
+    <Window.Resources>
+        <!-- ══ 主按钮：渐变蓝圆角 ══ -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#2563EB" Offset="0"/>
+                                    <GradientStop Color="#1D4ED8" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ══ 次按钮：描边 ══ -->
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#F1F5F9"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ══ 卡片（白底圆角，无阴影保证文字清晰） ══ -->
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="BorderBrush" Value="#D8DEE8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+
+        <!-- ══ 卡片标题 ══ -->
+        <Style x:Key="CardTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#0F172A"/>
+        </Style>
+
+        <!-- ══ 输入框 ══ -->
+        <Style x:Key="InputBox" TargetType="TextBox">
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,0"/>
+        </Style>
+
+        <!-- ══ 表头样式（浅色、无竖线分隔） ══ -->
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        </Style>
+
+        <!-- ══ 单元格样式（无边框、不可聚焦，去掉点击时的黑色边框） ══ -->
+        <Style TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Background="Transparent" BorderThickness="0" Padding="4,0">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ══ 行样式（选中深蓝高亮、无竖线） ══ -->
+        <Style TargetType="DataGridRow">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#93C5FD"/>
+                    <Setter Property="Foreground" Value="#0F172A"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#DBEAFE"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ══ 头部横幅 ══ -->
+        <Border Grid.Row="0" CornerRadius="8" Padding="20,16">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#111C33" Offset="0"/>
+                    <GradientStop Color="#1E3A8A" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Hyper-V 显卡虚拟化部署工具" FontSize="19" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="自动为虚拟机配置 GPU 分区（GPU-PV），让虚拟机使用宿主机显卡" FontSize="12" Foreground="#B8C4E0" Margin="0,3,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="1" x:Name="TargetBadge" Background="#334155" CornerRadius="16" Padding="14,6" VerticalAlignment="Center">
+                    <TextBlock x:Name="TargetText" Text="目标虚拟机：未选择" FontSize="12.5" FontWeight="SemiBold" Foreground="White"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- ══ 双列表 ══ -->
+        <Grid Grid.Row="1" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 虚拟机列表 -->
+            <Border Grid.Column="0" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="4" Height="16" CornerRadius="2" Background="#2563EB" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="虚拟机列表" Style="{StaticResource CardTitle}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button x:Name="NewVmButton" Content="＋ 新建虚拟机" Height="28" Padding="12,0" Margin="0,0,8,0"
+                                    Background="#EFF6FF" Foreground="#1D4ED8" FontSize="12.5" BorderThickness="0"
+                                    Cursor="Hand" Click="NewVmButton_Click"/>
+                            <Button x:Name="ImportVmButton" Content="⤓ 导入虚拟机" Height="28" Padding="12,0" Margin="0,0,8,0"
+                                    Background="#EFF6FF" Foreground="#1D4ED8" FontSize="12.5" BorderThickness="0"
+                                    Cursor="Hand" Click="ImportVmButton_Click"/>
+                            <Button x:Name="RefreshButton" Content="⟳ 刷新列表" Height="28" Padding="12,0"
+                                    Background="#EEF2F7" Foreground="#334155" FontSize="12.5" BorderThickness="0"
+                                    Cursor="Hand" Click="RefreshButton_Click"/>
+                        </StackPanel>
+                    </Grid>
+                    <!-- Hyper-V 未启用提示条 -->
+                    <Border x:Name="HyperVTipBar" Grid.Row="1" Visibility="Collapsed"
+                            Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="6"
+                            Padding="12,8" Margin="0,0,0,10">
+                        <Grid>
+                            <TextBlock Text="未检测到 Hyper-V 功能" FontSize="12.5" Foreground="#92400E"
+                                       VerticalAlignment="Center" TextWrapping="Wrap"/>
+                            <Button Content="一键开启 Hyper-V" Height="28" Padding="12,0" HorizontalAlignment="Right"
+                                    Background="#F59E0B" Foreground="White" FontSize="12.5" FontWeight="SemiBold"
+                                    BorderThickness="0" Cursor="Hand" Click="EnableHyperVButton_Click"/>
+                        </Grid>
+                    </Border>
+                    <DataGrid x:Name="VmGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True"
+                              SelectionMode="Single" SelectionUnit="FullRow" HeadersVisibility="Column"
+                              RowHeight="24" FontSize="13"
+                              BorderBrush="#E2E8F0" BorderThickness="1"
+                              GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#F1F5F9"
+                              EnableRowVirtualization="True" SelectionChanged="VmGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTemplateColumn Header="状态" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="7" Height="7" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                <Ellipse.Style>
+                                                    <Style TargetType="Ellipse">
+                                                        <Setter Property="Fill" Value="#94A3B8"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding State}" Value="Running">
+                                                                <Setter Property="Fill" Value="#22C55E"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding State}" Value="Saved">
+                                                                <Setter Property="Fill" Value="#F59E0B"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Ellipse.Style>
+                                            </Ellipse>
+                                            <TextBlock Text="{Binding StateDisplay}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="内存" Binding="{Binding MemoryDisplay}" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- 可分区显卡 -->
+            <Border Grid.Column="2" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="4" Height="16" CornerRadius="2" Background="#2563EB" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="可分区显卡" Style="{StaticResource CardTitle}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Button x:Name="RefreshGpuButton" Content="⟳ 刷新列表" Height="28" Padding="12,0"
+                                Background="#EEF2F7" Foreground="#334155" FontSize="12.5" BorderThickness="0"
+                                Cursor="Hand" HorizontalAlignment="Right" Click="RefreshButton_Click"/>
+                    </Grid>
+                    <DataGrid x:Name="GpuGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
+                              SelectionMode="Single" SelectionUnit="FullRow" HeadersVisibility="Column"
+                              RowHeight="24" FontSize="13"
+                              BorderBrush="#E2E8F0" BorderThickness="1"
+                              GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#F1F5F9"
+                              EnableRowVirtualization="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="显卡" Binding="{Binding DisplayName}" Width="*"/>
+                            <DataGridTextColumn Header="显存" Binding="{Binding VramDisplay}" Width="70"/>
+                            <DataGridTemplateColumn Header="可分配" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding PartText}" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#A0A0A0"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsPartitionable}" Value="True">
+                                                            <Setter Property="Foreground" Value="#16A34A"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ══ 配置操作条 ══ -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,16,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                        <Grid>
+                            <TextBlock Text="显存 / 算力分配比例" FontSize="12.5" Foreground="#334155" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="SharePercentText" Text="50%" FontSize="15" FontWeight="Bold" Foreground="#2563EB"
+                                       HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                        <Slider x:Name="ShareSlider" Minimum="0.05" Maximum="1" SmallChange="0.05" LargeChange="0.1"
+                                TickFrequency="0.05" IsSnapToTickEnabled="True" Height="28" Margin="0,2,0,0"
+                                ValueChanged="ShareSlider_ValueChanged" Value="0.5"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="驱动同步说明" FontSize="12.5" Foreground="#334155"/>
+                        <TextBlock Text="部署时将自动连接虚拟机拷贝显卡驱动；若 Windows 弹出凭据窗口，请选择虚拟机内的管理员账户并确认（仅需一次）"
+                                   FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                    <Button x:Name="DeployButton" Content="部署 GPU 虚拟化" Style="{StaticResource PrimaryButton}"
+                            Margin="0,0,10,0" Click="DeployButton_Click" IsEnabled="False"/>
+                    <Button x:Name="UninstallButton" Content="卸载 GPU 虚拟化" Style="{StaticResource SecondaryButton}"
+                            Click="UninstallButton_Click" IsEnabled="False"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ══ 执行日志 ══ -->
+        <Border Grid.Row="3" Style="{StaticResource Card}" Margin="0,16,0,0" Padding="14,12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,8">
+                    <Border Width="4" Height="16" CornerRadius="2" Background="#22C55E" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="执行日志" Style="{StaticResource CardTitle}" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Border Grid.Row="1" CornerRadius="6" Background="#0F172A" Padding="10,6">
+                    <TextBox x:Name="LogBox" Height="150" IsReadOnly="True" IsReadOnlyCaretVisible="False"
+                             VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                             FontFamily="Consolas" FontSize="13" TextWrapping="NoWrap"
+                             TextOptions.TextFormattingMode="Display"
+                             TextOptions.TextRenderingMode="ClearType"
+                             Background="Transparent" Foreground="#E8E8E8" BorderThickness="0" Padding="0"/>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
